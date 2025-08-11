@@ -60,6 +60,23 @@
 [instagram]: https://www.instagram.com/username/
 [linkedin]: https://linkedin.com/in/kevonne-allen-95ab57185/
 
+<h2> 💻 Desktop Specs:</h2>
+<b>
+- ASRock Phantom AMD Radeon RX 7900 XT: $729.29
+- Rog Strix X870-A Motherboard: $311.01
+- AMD Ryzen 7 7800X3D: $449.99
+- Corsair RM850: $139.99
+- 4 iCue Link RX 120 RGB: $134.98
+- iCue Link Titan 360 RGB: $179.99
+- Corsair MP600 Pro LPX: $160.86
+- Corsair Dominator 4x16: $382.99
+- Corsair iCue Link 6500X RGB Mid-Tower ATX Dual Chamber: $289.56
+- Corsair GPU Anti Sag Bracket: $19.99
+- iCue LC100 Case Accent Lighting Panels: $34.99
+- Samsung Portable SSD T9: $114.99
+</b>
+
+
 <!--
 
 Here are some ideas to get you started:
