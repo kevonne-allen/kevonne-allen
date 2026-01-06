@@ -212,6 +212,309 @@ Low-cost archival storage. DevOps use: Long-term backup retention, compliance ar
 AWS Storage Gateway
 Hybrid storage integration between on-premises and AWS. DevOps use: Backup on-premises data to AWS, cached access to S3. Exam tip: Understand for hybrid cloud scenarios; File Gateway (S3), Volume Gateway (EBS snapshots), Tape Gateway (VTL).
 
+CloudTrail → CloudWatch Logs integration is standard—not S3, not Kinesis
+CloudWatch Agent ONLY delivers to CloudWatch Logs—no direct S3 or Kinesis option
+CloudWatch Logs Insights is the unified query tool—Athena cannot query CloudWatch Logs
+256 KB event size limitation applies to CloudTrail → CloudWatch Logs delivery
+Two separate IAM roles may be needed: CloudTrail role and EC2 CloudWatch Agent role
+Log group location matters: CloudTrail log group must be in the same AWS account
+StackSets is purpose-built for multi-account CloudFormation deployments in AWS Organizations
+Service-managed permissions eliminate manual IAM role creation
+Automatic deployment on new account creation is a native StackSet feature
+No extra code required—declarative infrastructure-as-code via CloudFormation
+EventBridge + Lambda adds unnecessary complexity without operational benefit
+Systems Manager Automation is for operational tasks, not infrastructure provisioning
+Organization Trails handle CloudTrail logging but not resource provisioning
+Unified management from management account—no need to access individual accounts
+AWS Config Rules are purpose-built for configuration compliance assessment—not CloudWatch Logs, CloudTrail, or EventBridge
+Two evaluation triggers exist: Configuration changes (immediate) and Periodic (scheduled)
+Custom rules enable test-driven compliance development
+CloudTrail logs API activities for audit trail and forensics, not configuration compliance
+CloudWatch Logs Agent is for application/system logs—not AWS resource configuration monitoring
+Auto-remediation (Lambda + EventBridge) violates auditing requirements—the mandate is monitoring, not fixing
+KMS encryption secures CloudTrail logs for compliance purposes
+Managed + Custom rules together provide both quick-start compliance and organization-specific standards
+CloudWatch Logs Subscriptions enable real-time event-driven processing—not alarms or metrics
+Subscription filters deliver events to Lambda, Kinesis, or Firehose—enabling custom automation
+CloudWatch alarms DO NOT support direct Lambda invocation—SNS is the intermediary
+EventBridge scheduled rules use rate or cron expressions—no second-level precision
+Step Functions is for complex orchestration—not for simple two-step automation
+Fully automated solutions require no human intervention—eliminating manual approval options
+Log events are base64-encoded and gzip-compressed—Lambda must decode them
+EventBridge Scheduler is preferred over scheduled rules for new implementations
+Batch processing by subscriptions is not guaranteed—but typically occurs for optimization
+Subscription filters retry for 24 hours on retryable errors—ensuring eventual delivery
+Stack drift detects unmanaged configuration changes—resources modified outside CloudFormation
+Drift detection requires CloudFormation DetectStackDrift API invocation—subject to rate limits
+Throttling errors result in NON_COMPLIANT status—AWS Config defaults to non-compliant when API is unavailable
+Rule execution timeout is 15 minutes maximum—large stacks may exceed this
+Solution for throttling: restrict rule scope using tags—create multiple rule instances for tag-based subsets
+Custom resources are NOT supported for drift detection—CloudFormation skips them entirely
+Permission errors have explicit messaging—different from throttling errors
+Explicitly set properties drift; defaults don't—CloudFormation only tracks intentional configuration
+IAM role must have cloudformation:DetectStackDrift permission
+Multiple rule instances can evaluate different stack groups—avoiding throttling while maintaining comprehensive coverage
+VPC peering is required for cross-account EFS access—provides network connectivity
+EFS file system policy must grant permissions—not SCPs
+Lambda execution role needs two types of permissions: VPC access + EFS access
+Cross-region EFS + Lambda is NOT supported—architectural limitation
+Cross-AZ within same account uses VPC routing—Lambda automatically selects correct mount target
+EFS access points enforce path and permission isolation—enable safe multi-function sharing
+Data transfer charges apply to cross-account peering—trade-off vs. duplicate EFS
+No user-configured policy = default full access via mount targets
+elasticfilesystem:ClientMount and ClientWrite are required for EFS access
+Mount path in Lambda is user-specified (e.g., /mnt/efs)—appears as local directory
+UPDATE_ROLLBACK_FAILED occurs when rollback itself fails—not the original update
+Common cause: external resource changes—CloudFormation doesn't know about them
+ContinueUpdateRollback is the recovery command—not drift detection or StackSets
+Manual fixes must precede ContinueUpdateRollback—address root cause first
+Drift detection is observational, not corrective—wrong tool for recovery
+StackSets is for multi-account orchestration—not single-stack recovery
+Reapplying original template won't help—root cause still exists
+ResourcesToSkip is a last resort—creates template inconsistency
+Stack must be fixed before subsequent updates—to avoid cascading failures
+CloudFormation requires stable external state to complete rollbacks
+ABAC is tag-based authorization—allows/denies based on tag matching
+ABAC scales automatically with new resources—no policy updates needed
+RBAC requires manual policy updates for new resources
+Single ABAC policy covers multiple resources—vs. many RBAC policies
+Tags are applied to both IAM roles and AWS resources
+Condition uses ${aws:PrincipalTag/key} and aws:ResourceTag/key—for matching
+SCPs don't grant permissions—they set maximum permissions, not granular access
+Resource-based policies still require manual attachment per resource—not scalable
+ACLs are cross-account only—can't control same-account access
+ABAC enables dynamic response to organizational change—teams grow without policy rewrites
+S3 bucket name MUST start with aws-waf-logs-—mandatory requirement, not optional
+S3 bucket suffix can be anything—provides flexibility in naming
+Bucket must be in same AWS account as WAF—cross-account logging not supported
+Log files delivered every 5 minutes—batched delivery interval
+Maximum file size is 75 MB—larger files split automatically
+Logs are gzip compressed—must decompress to read
+AWS WAF supports only customer-managed KMS keys—NOT AWS-managed keys
+Kinesis Stream as Firehose source is NOT recommended—adds unnecessary complexity
+CloudWatch Logs naming requirement: aws-waf-logs-—same as S3
+Log file storage path includes account ID, region, web ACL name, and timestamp—enables organizing large log volumes
+Metric Filters convert log data to metrics—enabling numeric analysis and alarming
+Filter patterns define what to look for—using symbolic syntax for log interpretation
+Custom metrics are published in real-time—enabling responsive alerting
+CloudWatch Alarms watch metrics and trigger actions—including SNS notifications
+Metric Filters are NOT retroactive—only filter logs created after filter creation
+SNS email subscriptions require confirmation—subscribers must click confirmation link
+Metric Streams are NOT for log filtering—and Firehose is not a supported destination
+Transit Gateway Flow Logs are network-level—not application security events
+Lambda Insights monitors Lambda functions—not firewall logs
+Dimensions enable multi-dimensional metrics—separate metrics per dimension value
+Default value ensures data in every period—preventing "spotty" metric data
+Evaluate multiple periods to reduce false alarms—set datapoints-to-alarm threshold
+CodePipeline Lambda actions enable custom automation—triggered at specific pipeline stages
+Event-driven automation is superior to schedule-driven—better efficiency and responsiveness
+CloudFront invalidation requires cloudfront:CreateInvalidation—not S3 API
+API Gateway SDK can be programmatically downloaded—via SDK generation API
+Lambda is required for custom logic—CodePipeline has no native SDK export capability
+CodePipeline integration with API Gateway for SDK export does not exist—common exam distractor
+S3 has no cache invalidation API—only CloudFront can invalidate
+Scheduled triggers waste resources—event-driven triggers are more efficient
+Lambda must notify CodePipeline of success/failure—to mark pipeline stage complete
+CloudFront distribution required for SDK distribution—enables global access and caching
+SDK invalidation path should be broad (e.g., /sdks/*)—invalidates all versions simultaneously
+API ID and stage name are required parameters for SDK download—extracted from pipeline input
+DeletionPolicy: Retain preserves resources when stack deletes—fundamental attribute for retention
+Retain can be applied to any resource type—not limited to specific services
+Retained resources continue to incur charges—they remain in the account
+Import allows resources to be managed by new stacks—re-establishing CloudFormation control
+Snapshot still deletes the resource—it only creates a backup before deletion
+Hooks are for policy enforcement—not resource management or retention
+DependsOn is for resource dependencies—not for retention or stack relationships
+Five-step process: Deploy → Retain → Delete → Import → Remove Retain
+Not all resources support import—must verify before attempting import
+Test in non-production first—to avoid data loss on critical resources
+Resource identifiers must be accurate for import—vpc-id, bucket names, instance IDs
+Stack renaming requires complete delete/recreate—no direct rename operation in CloudFormation
+StackSets enable multi-Region, multi-account deployment from one template—purpose-built for this use case
+Single template deployed consistently across all stack instances—ensures uniformity
+CLI create-stack supports only --region (singular), not multiple Regions—requires separate commands
+Shell scripts are not elegant solutions for what StackSets provide natively—avoid custom complexity
+Change sets are for previewing updates—not for multi-Region deployment
+StackSet is a regional resource—created in one Region, manages stacks across Regions
+Stack instances are created for each Account × Region combination
+Deployment preferences control parallelism and failure tolerance—enable safe at-scale operations
+Updates to StackSet automatically update all stack instances—no selective updates
+Self-managed vs. service-managed permissions—choose based on AWS Organizations usage
+Stack instance status: CURRENT (up-to-date), OUTDATED (behind), INOPERABLE (failed)
+Retain stacks option—keep resources when removing stack instances
+CloudWatch Agent collects logs from EC2 instances—sends every 5 seconds by default
+Metric filters create metrics from log patterns—enable alarming on log events
+Metric filters are different from subscription filters—metric filters create metrics; subscriptions stream data
+Real-time monitoring latency: ~2 minutes from login to email notification
+CloudTrail logs API calls, not system logins—captures different event types
+CloudTrail delivery time: ~5 minutes (not guaranteed)—too slow for real-time monitoring
+Amazon Inspector scans for vulnerabilities—not for login detection
+SNS enables multi-recipient alerting—email, SMS, webhooks supported
+Default metric value of 0 ensures metric data in every period—prevents "spotty" data
+Agent requires IAM permissions to write to CloudWatch Logs
+Log pattern syntax is flexible—supports text search and JSON parsing
+Alarms on Sum statistic are typical for event counting (login events)
+Content-MD5 header provides upload-time integrity verification—validates data during transmission
+ETag is returned in response and can be compared to calculated MD5—confirms data wasn't corrupted
+S3 returns BadDigest error if MD5s don't match—prevents storage of corrupted objects
+ETag reflects content changes only, not metadata changes—metadata modifications don't change ETag
+For single-part, unencrypted uploads: ETag = MD5 digest—enables easy verification
+For multipart uploads: ETag ≠ simple MD5—composite hash used instead
+For encrypted objects: ETag ≠ MD5—encryption affects ETag calculation
+For directory buckets: ETag ≠ MD5—different calculation method
+Trailing checksums are AWS-calculated, not user-provided—cannot be manually provided
+Custom metadata is not used for integrity verification—must use Content-MD5 header
+Version ID is for tracking versions, not data integrity—completely different purpose
+MD5 must be Base64-encoded in Content-MD5 header—not hexadecimal format
+CloudFormation service role decouples user permissions from CloudFormation permissions—enables fine-grained control
+Service role must have REQUIRED permissions, not full permissions—least privilege principle
+PassRole permission is REQUIRED for developers to specify service role—mandatory step
+PassRole must specify exact role ARN in Resource element—prevents privilege escalation
+ResourceTag condition on PassRole does NOT work reliably—use resource ARN instead
+SourceIp condition should NOT be used with CloudFormation—CloudFormation makes calls from its own IP
+Service role cannot be removed after stack is created—plan carefully before creating stack
+All stack operations use the specified service role—no selective role per operation
+PassRole is NOT an API call and doesn't appear in CloudTrail—permission check only
+Principle of least privilege applies to both service role and developer role—minimize granted permissions
+Lambda is required to implement custom filtering logic for Glue job events—EventBridge alone cannot detect retry failures​
+Job run ID contains retry information (e.g., _attempt_1)—Lambda examines this to detect retries​
+Direct EventBridge-to-SNS cannot filter for retry-specific failures—too generic without custom logic​
+Lambda examines event details and decides whether to publish SNS notification—conditional filtering​
+Retry failures indicated by _attempt_1 suffix in job run ID—key pattern to match​
+SNS is the notification mechanism—delivers to email, SMS, or other endpoints
+SQS DLQs are for message handling—not for Glue job retry orchestration or notifications
+Personal Health Dashboard is for AWS infrastructure—not for application job monitoring​
+EventBridge event patterns enable initial filtering—but Lambda adds specific business logic
+Lambda must publish SNS conditionally—only when specific conditions (retry failure) are met​
+CloudWatch Logs capture Lambda execution for auditing and debugging
+Multiple retry attempts can occur, but notification typically only on first retry failure
+Lambda MUST send response to pre-signed S3 URL—critical requirement for stack completion
+Pre-signed URL provided in CloudFormation request—Lambda extracts and uses it
+Response must include Status: SUCCESS or FAILED—determines stack operation outcome
+cfn-response module simplifies response sending—available only for ZipFile inline code
+If response not received, stack stays in-progress forever—until timeout (1 hour default)
+CloudFormation waits at pre-signed URL for response—blocks stack operation until response arrives
+Custom resource provider and template developer can be same person—roles are organizational, not technical
+ResponseURL must be used exactly as provided—no modification or redirection
+Response includes PhysicalResourceId—update detection uses this value
+Output data from response accessible via Fn::GetAtt—template developer can retrieve via function
+Manual response sending required for S3-based code—cfn-response only for inline ZipFile
+Timeout can be customized via ServiceTimeout property—adjust for expected response time
+Firewall Manager is for centralized security policy enforcement—not threat detection
+Three prerequisites: AWS Organizations, Administrator Account, AWS Config—all mandatory
+Policies define WAF rules and scope—automatically applied to matching resources
+Scope based on accounts, resource types, tags—granular control
+Policies apply to new AND existing resources—proactive protection
+GuardDuty is reactive (responds to threats), not proactive policy enforcement
+AWS Config is prerequisite, not replacement—detects resources for Firewall Manager
+Systems Manager irrelevant—operational tool, not security policy tool
+Enables distributed development with centralized security oversight—solves core tension
+Partner rules can be integrated—replicate on-premises security posture
+Individual accounts can add rules to Firewall Manager web ACLs—flexible baseline model
+Auto-remediation option available—can automatically fix non-compliant resources
+Systems Manager Agent required on all instances—enables patch operations
+AWS-RunPatchBaseline supports Windows, Linux, and macOS—recommended document
+AWS-ApplyPatchBaseline Windows-only—cannot use for Linux
+Patch baselines define approval rules—classification, severity, days to approve
+Test in pre-production before production deployment—reduces production risk
+Maintenance windows automate scheduling—eliminates manual patching
+Approval workflow required—document and validate patches before production
+CloudFormation is for provisioning, not patching—Systems Manager handles ongoing patches
+OS-native patching violates scalability requirement—not suitable for enterprise
+Compliance reporting provides audit trail—track who, what, when of patching
+CRON/Rate expressions for scheduling—automate execution without manual intervention
+Reboot options configurable—balance patching with availability requirements
+Trust relationship in application account role—trusts DevOps CodeBuild role
+Trust direction critical: Application role trusts DevOps, not reverse
+sts:AssumeRole enables cross-account access—CodeBuild assumes application role
+Application role needs EKS permissions: eks:DescribeCluster, eks:AccessKubernetesApi
+aws-auth ConfigMap maps IAM roles to Kubernetes users/groups
+Kubernetes RBAC provides final authorization layer
+AssumeRoleWithSAML for external federation—not for cross-account AWS access
+Reverse trust direction breaks the flow—CodeBuild cannot assume the role
+Three-layer security model: AWS IAM → EKS API → Kubernetes RBAC
+Role session name important for audit trail—visible in CloudTrail
+Resource ARNs in policies limit scope—don't use wildcards
+ClusterRoleBinding completes the RBAC chain—maps Kubernetes groups to permissions
+10% margin (or 1 instance, whichever is greater) during rebalancing—temporary capacity override
+Launch before terminate—maintains availability during rebalancing
+Margin only during rebalancing—not during regular scale-out
+Margin only when at/near max—when margin would be needed
+AZ balance takes absolute precedence—more important than any termination policy
+Newer instances can be terminated before older—if needed for AZ balance
+Mixed instances: identify purchase type first—determine Spot vs. On-Demand
+Then apply termination policy per AZ—independently per zone
+Can temporarily cause AZ imbalance—but corrected in later operations
+Billing hour is last tiebreaker—not primary criterion
+One custom Lambda policy possible—not multiple policies
+Default termination policy prioritizes configurations—outdated configs first, then billing hour
+SAM provides built-in traffic shifting for Lambda—no need for manual CodeDeploy config
+CloudFormation alone cannot do Lambda traffic shifting—requires SAM
+AutoPublishAlias automatically creates/updates Lambda aliases—SAM managed
+DeploymentPreference defines traffic-shifting pattern—Canary or Linear
+PreTraffic hook runs before any traffic shifts—early error detection
+PostTraffic hook runs after traffic fully shifted—live traffic validation
+CloudWatch alarms trigger automatic rollback—no manual intervention needed
+Canary pattern: 2-phase shift (e.g., 10% then 100%)
+Linear pattern: equal increments (e.g., 10% every minute)
+Change sets don't reduce error detection time—preview only, no testing
+Pre-traffic tests prevent bad code from reaching users—fail fast
+Rollback is automatic and instant—no manual switchover required
+Target tracking specifies metric and target value—Application Auto Scaling handles the rest
+Application Auto Scaling creates/manages CloudWatch alarms automatically—don't create manually
+Scale-out is aggressive, scale-in is conservative—prevents flapping
+Inverse metric relationship required—doubling capacity should halve utilization
+50% CPU utilization provides spare capacity—handles traffic spikes
+Scheduled scaling for predictable patterns—weekly, daily, seasonal
+Target tracking + Scheduled scaling together—proactive + reactive
+Step scaling for complex thresholds—more complex than target tracking
+Lambda not supported by step scaling—use other mechanisms
+Spot Fleets fully supported—target tracking and scheduled scaling
+CRON expressions for scheduled actions—specify exact times
+Target tracking simpler than step scaling—prefer unless complex requirements
+16 MB threshold for multipart (not 50 MB)—console auto-switches at this size​
+Single-part = direct checksum—MD5 of entire object​
+Multipart = composite checksum—MD5 of part checksums​
+Checksum changes when method changes—expected behavior​
+Console operations (>16 MB) trigger multipart—rename, copy, metadata edit​
+ETag format shows upload method—"-NN" suffix = multipart​
+Developer's single-part calculation was correct—not a calculation error​
+Composite calculation is correct for multipart—not an error either​
+Both methods follow AWS design—this is intentional​
+Algorithm doesn't change—MD5 stays MD5, CRC64 stays CRC64​
+Calculation METHOD changes—direct vs. composite​
+Can't directly compare checksums across methods—different approaches entirely​
+Blue/Green uses two identical environments—blue (current) and green (new)​
+Deploy code BEFORE switching traffic—never reverse this order​
+Rolling restart deploys to green—gradual instance replacement​
+ALB listener rule switches traffic—points to different target group​
+Single ALB scenario: Use target group switching, NOT Route 53​
+Zero downtime due to load balancer switching—application never offline​
+Quick rollback capability—switch back to blue if needed​
+Blue kept standby or terminated—balance cost vs. rollback speed​
+Health checks must pass—before traffic directed to green​
+All-at-once deployment = downtime—not compatible with Blue/Green​
+Route 53 swap irrelevant with single ALB—one endpoint only​
+ALB rule modification is instant—no DNS propagation delay​
+Terminating:Wait is the correct state—pauses before termination​
+Lifecycle hooks provide time window for custom actions—default 1 hour​
+CloudWatch Events monitors Terminating:Wait events—triggers automation​
+Systems Manager automation document runs cleanup logic—PowerShell, create AMI, signal completion​
+InputTransformer extracts values from CloudWatch events—passes to automation parameters​
+Patch Manager not suitable—for patching only, not custom logic​
+Maintenance Windows not suitable—scheduled, not event-driven​
+Multiple IAM roles needed—automation role and CloudWatch Events role​
+CompleteLifecycleAction signals ASG to proceed—moves to Terminating:Proceed​
+Terminating:Pending does NOT exist—invalid state​
+Domain removal before termination—prevents orphaned domain objects​
+AMI creation preserves instance state—for recovery or auditing purposes
+AllowTraffic failure + No Logs = Load Balancer Health Check Issue—Golden rule for CodeDeploy exam questions.​
+Lifecycle scripts (ApplicationStart, etc.) ALWAYS generate logs if they run.​
+AllowTraffic executes on the Load Balancer, not the instance—hence no local logs.​
+Terminated instances cause timeouts (1 hour), not immediate silent failures.​
+Review Target Group settings to resolve ALB-related deployment failures.
+
+
 
 </b>
 
