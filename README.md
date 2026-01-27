@@ -2,7 +2,7 @@
      
 <h2>📜 Certifications:</h2>
 
-  - [AWS Certified DevOps Engineer -Professional](https://www.credly.com/badges/85c94c37-4398-4914-b3dc-08baf23660a1/public_url)
+  - [AWS Certified DevOps Engineer - Professional](https://www.credly.com/badges/85c94c37-4398-4914-b3dc-08baf23660a1/public_url)
   - [AWS Security Specialty](https://www.credly.com/badges/79981d26-9708-4cb5-a3ad-53ab22c09097/public_url)
   - [AWS Developer Associate](https://www.credly.com/badges/c63de203-63db-4d83-9264-06bb1ea1741f/public_url)
   - [AWS Solution Architect Associate](https://www.credly.com/badges/ae8384ed-e0f9-4939-a40a-65685f579593/public_url)
